@@ -32,6 +32,7 @@ async def main() -> None:
         api_key=settings.openai_api_key,
         model=settings.openai_model,
         request_timeout=settings.http_timeout_seconds,
+        base_url=settings.openai_base_url,
     )
 
     router = build_router(

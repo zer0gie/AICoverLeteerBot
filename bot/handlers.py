@@ -1,3 +1,4 @@
+import asyncio
 import html
 import logging
 import re
@@ -14,6 +15,10 @@ from bot.services.hh_parser import VacancyParser
 
 logger = logging.getLogger(__name__)
 URL_RE = re.compile(r"https?://[^\s]+", re.IGNORECASE)
+
+# Один пользователь — одна долгая обработка вакансии; повторная ссылка до завершения отклоняется.
+_vacancy_busy_lock = asyncio.Lock()
+_vacancy_busy: set[int] = set()
 
 
 class PendingAction(str, Enum):
@@ -162,8 +167,17 @@ def build_router(
             )
             return
 
-        wait_message = await message.answer("Читаю вакансию и готовлю письмо...")
+        async with _vacancy_busy_lock:
+            if user_id in _vacancy_busy:
+                await message.answer(
+                    "Сейчас обрабатываю предыдущую ссылку. Дождись ответа и пришли следующую."
+                )
+                return
+            _vacancy_busy.add(user_id)
+
+        wait_message = None
         try:
+            wait_message = await message.answer("Читаю вакансию и готовлю письмо...")
             vacancy = await deps.parser.parse(url)
             letter = await deps.cover_letter_service.generate(
                 vacancy=vacancy,
@@ -187,9 +201,17 @@ def build_router(
             await wait_message.edit_text(header + html.escape(letter))
         except Exception as exc:  # noqa: BLE001
             logger.exception("Failed to process vacancy URL: %s", exc)
-            await wait_message.edit_text(
-                "Не удалось обработать ссылку. Проверь URL и попробуй еще раз."
-            )
+            if wait_message:
+                await wait_message.edit_text(
+                    "Не удалось обработать ссылку. Проверь URL и попробуй еще раз."
+                )
+            else:
+                await message.answer(
+                    "Не удалось обработать ссылку. Проверь URL и попробуй еще раз."
+                )
+        finally:
+            async with _vacancy_busy_lock:
+                _vacancy_busy.discard(user_id)
 
     return router
 

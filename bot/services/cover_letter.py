@@ -71,7 +71,12 @@ class CoverLetterService:
                 pool=60.0,
             )
         else:
-            kwargs["timeout"] = request_timeout
+            kwargs["timeout"] = httpx.Timeout(
+                connect=30.0,
+                read=float(request_timeout),
+                write=120.0,
+                pool=30.0,
+            )
         self._client = AsyncOpenAI(**kwargs)
 
     async def close(self) -> None:

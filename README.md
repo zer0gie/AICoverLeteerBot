@@ -48,7 +48,8 @@ TELEGRAM_BOT_TOKEN=...
 OPENAI_BASE_URL=http://127.0.0.1:11434/v1
 OPENAI_MODEL=llama3.2:3b
 OPENAI_API_KEY=
-HTTP_TIMEOUT_SECONDS=600
+LLM_HTTP_TIMEOUT=600
+VACANCY_HTTP_TIMEOUT=45
 ```
 
 Ключ для Ollama можно оставить пустым — в коде подставится значение `ollama` (так устроен OpenAI-совместимый слой Ollama).

@@ -27,11 +27,11 @@ async def main() -> None:
     )
     dp = Dispatcher()
 
-    parser = VacancyParser(timeout=settings.http_timeout_seconds)
+    parser = VacancyParser(timeout=settings.vacancy_http_timeout_seconds)
     cover_letter_service = CoverLetterService(
         api_key=settings.openai_api_key,
         model=settings.openai_model,
-        request_timeout=settings.http_timeout_seconds,
+        request_timeout=settings.llm_http_timeout_seconds,
         base_url=settings.openai_base_url,
     )
 

@@ -34,11 +34,7 @@ def _load_settings() -> Settings:
     if base and not api_key:
         api_key = "ollama"
 
-    llm_timeout_raw = os.getenv("LLM_HTTP_TIMEOUT", "").strip()
-    legacy_http = os.getenv("HTTP_TIMEOUT_SECONDS", "").strip()
-    llm_http_timeout_seconds = int(
-        llm_timeout_raw or legacy_http or "600",
-    )
+    llm_http_timeout_seconds = int(os.getenv("LLM_HTTP_TIMEOUT", "900"))
     vacancy_http_timeout_seconds = int(os.getenv("VACANCY_HTTP_TIMEOUT", "45"))
 
     return Settings(

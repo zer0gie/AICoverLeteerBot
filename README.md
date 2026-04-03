@@ -1,7 +1,7 @@
 # AI Telegram Bot: Cover Letter from Vacancy URL
 
 Telegram-бот на Python, который:
-- принимает ссылку на вакансию (например `hh.ru`);
+- принимает ссылку на страницу вакансии (job-борд или сайт работодателя);
 - извлекает текст вакансии;
 - генерирует сопроводительное письмо через **OpenAI API** или **локальную LLM** (например Ollama) по вашему шаблону;
 - хранит профиль пользователя, историю запросов, лимиты и базовую статистику.
@@ -48,7 +48,7 @@ TELEGRAM_BOT_TOKEN=...
 OPENAI_BASE_URL=http://127.0.0.1:11434/v1
 OPENAI_MODEL=llama3.2:3b
 OPENAI_API_KEY=
-HTTP_TIMEOUT_SECONDS=120
+HTTP_TIMEOUT_SECONDS=600
 ```
 
 Ключ для Ollama можно оставить пустым — в коде подставится значение `ollama` (так устроен OpenAI-совместимый слой Ollama).
@@ -84,5 +84,5 @@ docker compose -f docker-compose.ollama.yml exec ollama ollama pull llama3.2:3b
 ## Примечания
 
 - Для `/stats` ваш `telegram_id` должен быть в `ADMIN_IDS`.
-- Парсинг заточен на `hh.ru`, но может сработать и на других страницах с вакансиями.
+- Парсинг использует общие HTML-селекторы; полнота полей зависит от вёрстки конкретного сайта.
 - Генерация через **Chat Completions** — совместима с OpenAI и с Ollama `/v1`.

@@ -9,7 +9,7 @@ from bot.config import settings
 from bot.database import Database
 from bot.handlers import build_router
 from bot.services.cover_letter import CoverLetterService
-from bot.services.hh_parser import VacancyParser
+from bot.services.vacancy_parser import VacancyParser
 
 
 async def main() -> None:

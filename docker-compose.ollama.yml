@@ -1,0 +1,20 @@
+# Локальная LLM через Ollama (OpenAI-совместимый API на порту 11434).
+# Запуск: docker compose -f docker-compose.ollama.yml up -d
+# Модель: docker compose -f docker-compose.ollama.yml exec ollama ollama pull llama3.2:3b
+#
+# В .env бота:
+#   OPENAI_BASE_URL=http://127.0.0.1:11434/v1
+#   OPENAI_MODEL=llama3.2:3b
+#   OPENAI_API_KEY=   (пусто — в коде подставится ollama)
+
+services:
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

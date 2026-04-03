@@ -14,6 +14,8 @@ class VacancyData:
 
 
 class VacancyParser:
+    """Загрузка HTML по URL и извлечение типовых полей вакансии (эвристики под разные job-сайты)."""
+
     def __init__(self, timeout: int = 20) -> None:
         self._client = httpx.AsyncClient(
             timeout=timeout,
@@ -38,14 +40,16 @@ class VacancyParser:
 
         return VacancyData(
             url=url,
-            title=title or "Не удалось определить должность",
-            company=company or "Не удалось определить компанию",
-            description=description[:6000],
+            title=title or "",
+            company=company or "",
+            description=(description[:6000] if description else ""),
         )
 
     def _extract_title(self, soup: BeautifulSoup) -> str:
         selectors = [
             "h1[data-qa='vacancy-title']",
+            "h1.vacancy-title",
+            ".vacancy-title",
             "h1",
             "meta[property='og:title']",
         ]
@@ -66,6 +70,11 @@ class VacancyParser:
         selectors = [
             "[data-qa='vacancy-company-name']",
             "[data-qa='bloko-header-2']",
+            "a[data-qa='vacancy-company-name']",
+            ".company-name",
+            ".vacancy-company-name",
+            "a[href*='/company/']",
+            "[itemprop='hiringOrganization']",
         ]
         for selector in selectors:
             element = soup.select_one(selector)
@@ -79,6 +88,9 @@ class VacancyParser:
         selectors = [
             "[data-qa='vacancy-description']",
             ".vacancy-description",
+            ".vacancy-response-text",
+            ".vacancy__description",
+            "[class*='vacancyDescription']",
             "main",
             "body",
         ]
@@ -90,4 +102,4 @@ class VacancyParser:
             text = re.sub(r"\n{3,}", "\n\n", text)
             if len(text) > 300:
                 return text
-        return "Описание вакансии не найдено."
+        return ""

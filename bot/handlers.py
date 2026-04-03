@@ -11,7 +11,7 @@ from aiogram.types import Message
 
 from bot.database import Database
 from bot.services.cover_letter import CoverLetterService
-from bot.services.hh_parser import VacancyParser
+from bot.services.vacancy_parser import VacancyParser
 
 logger = logging.getLogger(__name__)
 URL_RE = re.compile(r"https?://[^\s]+", re.IGNORECASE)
@@ -73,7 +73,7 @@ def build_router(
             "Как пользоваться:\n"
             "1) Выполни /profile и пришли свой профиль.\n"
             "2) При желании задай /template.\n"
-            "3) Отправь ссылку на вакансию (например с hh.ru).\n\n"
+            "3) Отправь ссылку на страницу вакансии (job-борд или сайт работодателя).\n\n"
             "Бот извлечет текст и сгенерирует сопроводительное письмо."
         )
 
@@ -192,12 +192,13 @@ def build_router(
                 letter_text=letter,
             )
 
-            header = (
-                f"<b>{html.escape(vacancy.title)}</b>\n"
-                f"{html.escape(vacancy.company)}\n"
-                f"{html.escape(vacancy.url)}\n\n"
-                "<b>Сопроводительное письмо:</b>\n"
-            )
+            header_lines: list[str] = []
+            if vacancy.title.strip():
+                header_lines.append(f"<b>{html.escape(vacancy.title)}</b>")
+            if vacancy.company.strip():
+                header_lines.append(html.escape(vacancy.company))
+            header_lines.append(html.escape(vacancy.url))
+            header = "\n".join(header_lines) + "\n\n<b>Сопроводительное письмо:</b>\n"
             await wait_message.edit_text(header + html.escape(letter))
         except Exception as exc:  # noqa: BLE001
             logger.exception("Failed to process vacancy URL: %s", exc)
